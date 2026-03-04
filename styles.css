@@ -1,0 +1,148 @@
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --line: #dbe3ef;
+  --text: #1d2738;
+  --sub: #54627a;
+  --primary: #0066ff;
+  --primary-hover: #0051cc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+  background: linear-gradient(160deg, #f7fbff 0%, #edf3ff 50%, #f4f7ff 100%);
+  color: var(--text);
+}
+
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+header p {
+  margin: 8px 0 0;
+  color: var(--sub);
+}
+
+.controls,
+.team-card,
+.used-section {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.buttons {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  border: 0;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--primary-hover);
+}
+
+button.secondary {
+  background: #8a96ab;
+}
+
+button.secondary:hover {
+  background: #707c90;
+}
+
+.status {
+  margin: 10px 0 0;
+  color: var(--sub);
+  min-height: 22px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.team-card h2 {
+  margin: 0 0 8px;
+}
+
+.lineup {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lineup li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.lineup li:last-child {
+  border-bottom: 0;
+}
+
+.role {
+  color: var(--sub);
+}
+
+.used-section h3 {
+  margin: 0 0 8px;
+}
+
+#usedCount {
+  margin: 0 0 12px;
+  color: var(--sub);
+}
+
+.used-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.used-pool span {
+  display: inline-block;
+  padding: 6px 10px;
+  background: #eef3ff;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+@media (min-width: 860px) {
+  .result-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

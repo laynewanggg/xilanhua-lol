@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LOL 10人内战阵容随机器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>LOL 10 人内战阵容随机器</h1>
+        <p>一键随机双方阵容，按位置匹配英雄池</p>
+      </header>
+
+      <section class="controls">
+        <label class="toggle">
+          <input type="checkbox" id="globalBp" />
+          <span>启用全局 BP（整局已上场英雄不可再次上场）</span>
+        </label>
+        <div class="buttons">
+          <button id="generateBtn" type="button">一键生成阵容</button>
+          <button id="resetGameBtn" type="button" class="secondary">重置整局</button>
+        </div>
+        <p id="status" class="status"></p>
+      </section>
+
+      <section class="result-grid">
+        <article class="team-card">
+          <h2>蓝色方</h2>
+          <ul id="blueTeam" class="lineup"></ul>
+        </article>
+        <article class="team-card">
+          <h2>红色方</h2>
+          <ul id="redTeam" class="lineup"></ul>
+        </article>
+      </section>
+
+      <section class="used-section">
+        <h3>全局已上场英雄</h3>
+        <p id="usedCount">0</p>
+        <div id="usedPool" class="used-pool"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
