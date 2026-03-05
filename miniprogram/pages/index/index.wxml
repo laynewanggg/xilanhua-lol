@@ -1,0 +1,129 @@
+<view class="app">
+  <view class="bg-glow bg-glow-left"></view>
+  <view class="bg-glow bg-glow-right"></view>
+  <view class="scan-line"></view>
+
+  <view class="header frame-card" bindlongpress="onLongPressHeader">
+    <view class="corner-decor top-left"></view>
+    <view class="corner-decor top-right"></view>
+    <text class="header-kicker">召唤师峡谷征召系统</text>
+    <text class="title">LOL 10 人内战阵容随机器</text>
+  </view>
+
+  <view class="easter-egg {{showEasterEgg ? 'show' : ''}}">
+    <view class="easter-egg-content frame-card">
+      <text class="easter-egg-label">战场通讯</text>
+      <text class="easter-egg-quote">{{easterEggQuote}}</text>
+    </view>
+  </view>
+
+  <view class="card controls frame-card">
+    <checkbox-group bindchange="onGlobalBpChange">
+      <label class="toggle">
+        <checkbox value="globalBp" checked="{{globalBp}}" color="#c89b3c" />
+        <text class="gold-text">启用全局 BP 协议 (海克斯协议)</text>
+      </label>
+    </checkbox-group>
+
+    <view class="bp-stats" wx:if="{{globalBp}}">
+      <view class="bp-stat-item">
+        <text class="bp-stat-label">英雄总数</text>
+        <text class="bp-stat-value">{{totalHeroes}}</text>
+      </view>
+      <view class="bp-stat-divider"></view>
+      <view class="bp-stat-item">
+        <text class="bp-stat-label">本次使用</text>
+        <text class="bp-stat-value">{{roundUsedHeroes}}</text>
+      </view>
+      <view class="bp-stat-divider"></view>
+      <view class="bp-stat-item">
+        <text class="bp-stat-label">累计已用</text>
+        <text class="bp-stat-value used">{{usedHeroesCount}}</text>
+      </view>
+      <view class="bp-stat-divider"></view>
+      <view class="bp-stat-item">
+        <text class="bp-stat-label">剩余</text>
+        <text class="bp-stat-value remaining">{{remainingHeroes}}</text>
+      </view>
+    </view>
+
+    <view class="buttons">
+      <button class="btn primary hex-btn" bindtap="generateLineup">一键生成阵容</button>
+      <button class="btn secondary hex-btn-alt" bindtap="resetGame">重置系统</button>
+    </view>
+
+    <view class="status-box {{statusType}}">
+      <view class="status-dot"></view>
+      <text class="status-text">{{status || '等待指令输入...'}}</text>
+    </view>
+  </view>
+
+  <view class="section-header">
+    <view class="bracket left"></view>
+    <text class="section-title">当前对战阵容</text>
+    <view class="bracket right"></view>
+  </view>
+
+  <view class="result-grid">
+    <view class="card team-card frame-card blue-side">
+      <view class="side-header">
+        <text class="side-label">蓝色方</text>
+        <text class="win-prob">预测胜率 {{winRate.blue}}%</text>
+      </view>
+      <view class="lineup">
+        <view class="lineup-item" wx:for="{{blueTeam}}" wx:key="role">
+          <view class="role-icon-placeholder"></view>
+          <text class="role">{{item.role}}</text>
+          <text class="hero-name">{{item.hero}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="vs-divider">
+      <view class="vs-circle">对决</view>
+    </view>
+
+    <view class="card team-card frame-card red-side">
+      <view class="side-header">
+        <text class="side-label">红色方</text>
+        <text class="win-prob">预测胜率 {{winRate.red}}%</text>
+      </view>
+      <view class="lineup">
+        <view class="lineup-item" wx:for="{{redTeam}}" wx:key="role">
+          <view class="role-icon-placeholder"></view>
+          <text class="role">{{item.role}}</text>
+          <text class="hero-name">{{item.hero}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card used-section frame-card">
+    <view class="corner-decor bottom-left"></view>
+    <view class="corner-decor bottom-right"></view>
+    <text class="card-title gold-text">已用英雄记录</text>
+    <text class="used-count">{{usedCountText}}</text>
+
+    <view class="history-list" wx:if="{{usageHistory.length}}">
+      <view class="history-card" wx:for="{{usageHistory}}" wx:key="round">
+        <text class="history-title">第 {{item.round}} 局</text>
+        <view class="history-head">
+          <text class="history-col-role">位置</text>
+          <text class="history-col-blue">蓝色方</text>
+          <text class="history-col-red">红色方</text>
+        </view>
+        <view class="history-row" wx:for="{{item.positions}}" wx:key="role" wx:for-item="pos">
+          <text class="history-col-role">{{pos.role}}</text>
+          <text class="history-col-blue">{{pos.blue}}</text>
+          <text class="history-col-red">{{pos.red}}</text>
+        </view>
+      </view>
+    </view>
+
+    <text class="history-empty" wx:else>暂无记录，生成阵容后会自动记录历史。</text>
+  </view>
+
+  <view class="footer">
+    <text>海克斯科技系统 · 长按标题查看版本信息</text>
+  </view>
+</view>
