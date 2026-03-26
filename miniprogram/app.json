@@ -3,10 +3,11 @@
     "pages/index/index"
   ],
   "window": {
-    "navigationBarTitleText": "LOL 内战阵容随机器",
-    "navigationBarBackgroundColor": "#f7fbff",
-    "navigationBarTextStyle": "black",
-    "backgroundTextStyle": "light"
+    "navigationBarTitleText": "LOL 内战随机器 v2.0",
+    "navigationBarBackgroundColor": "#0a0e1a",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0a0e1a",
+    "backgroundTextStyle": "dark"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

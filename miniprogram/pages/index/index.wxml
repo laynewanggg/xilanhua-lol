@@ -1,129 +1,204 @@
 <view class="app">
-  <view class="bg-glow bg-glow-left"></view>
-  <view class="bg-glow bg-glow-right"></view>
-  <view class="scan-line"></view>
+  <!-- 背景光效 -->
+  <view class="bg-glow"></view>
 
-  <view class="header frame-card" bindlongpress="onLongPressHeader">
-    <view class="corner-decor top-left"></view>
-    <view class="corner-decor top-right"></view>
-    <text class="header-kicker">召唤师峡谷征召系统</text>
-    <text class="title">LOL 10 人内战阵容随机器</text>
+  <!-- 顶部标题 -->
+  <view class="header" bindlongpress="onLongPressHeader">
+    <view class="logo-area">
+      <text class="logo-icon">⚔️</text>
+      <view class="title-area">
+        <text class="title">LOL 内战随机器</text>
+        <text class="subtitle">v2.0 · 10人阵容生成 · {{totalHeroes}}位英雄全覆盖</text>
+      </view>
+    </view>
   </view>
 
+  <!-- 彩蛋弹窗 -->
   <view class="easter-egg {{showEasterEgg ? 'show' : ''}}">
-    <view class="easter-egg-content frame-card">
-      <text class="easter-egg-label">战场通讯</text>
+    <view class="easter-egg-box">
+      <text class="easter-egg-label">📡 战场通讯</text>
       <text class="easter-egg-quote">{{easterEggQuote}}</text>
     </view>
   </view>
 
-  <view class="card controls frame-card">
-    <checkbox-group bindchange="onGlobalBpChange">
-      <label class="toggle">
-        <checkbox value="globalBp" checked="{{globalBp}}" color="#c89b3c" />
-        <text class="gold-text">启用全局 BP 协议 (海克斯协议)</text>
-      </label>
-    </checkbox-group>
-
-    <view class="bp-stats" wx:if="{{globalBp}}">
-      <view class="bp-stat-item">
-        <text class="bp-stat-label">英雄总数</text>
-        <text class="bp-stat-value">{{totalHeroes}}</text>
-      </view>
-      <view class="bp-stat-divider"></view>
-      <view class="bp-stat-item">
-        <text class="bp-stat-label">本次使用</text>
-        <text class="bp-stat-value">{{roundUsedHeroes}}</text>
-      </view>
-      <view class="bp-stat-divider"></view>
-      <view class="bp-stat-item">
-        <text class="bp-stat-label">累计已用</text>
-        <text class="bp-stat-value used">{{usedHeroesCount}}</text>
-      </view>
-      <view class="bp-stat-divider"></view>
-      <view class="bp-stat-item">
-        <text class="bp-stat-label">剩余</text>
-        <text class="bp-stat-value remaining">{{remainingHeroes}}</text>
+  <!-- 控制面板 -->
+  <view class="card control-panel">
+    <view class="control-row">
+      <view class="toggle-group">
+        <switch checked="{{globalBp}}" bindchange="onGlobalBpChange" color="#3b82f6" class="bp-switch" />
+        <text class="switch-text">全局 BP 模式</text>
+        <text class="hint">（已上场不可重复）</text>
       </view>
     </view>
-
-    <view class="buttons">
-      <button class="btn primary hex-btn" bindtap="generateLineup">一键生成阵容</button>
-      <button class="btn secondary hex-btn-alt" bindtap="resetGame">重置系统</button>
+    <view class="btn-group">
+      <button class="btn btn-primary" bindtap="generateLineup">🎲 生成阵容</button>
+      <button class="btn btn-ghost" bindtap="resetGame">🔄 重置</button>
+      <button class="btn btn-ghost" bindtap="openHistory">📋 历史</button>
     </view>
-
-    <view class="status-box {{statusType}}">
-      <view class="status-dot"></view>
-      <text class="status-text">{{status || '等待指令输入...'}}</text>
+    <view class="status-bar {{statusType}}" wx:if="{{status}}">
+      <text>{{status}}</text>
     </view>
   </view>
 
-  <view class="section-header">
-    <view class="bracket left"></view>
-    <text class="section-title">当前对战阵容</text>
-    <view class="bracket right"></view>
+  <!-- Ban 英雄面板 -->
+  <view class="card ban-panel">
+    <view class="ban-header">
+      <text class="card-title">🚫 Ban 英雄</text>
+      <view class="ban-controls">
+        <input
+          class="ban-input"
+          placeholder="输入英雄名搜索..."
+          placeholder-style="color:#4a5568"
+          value="{{banInput}}"
+          bindinput="onBanInput"
+          bindconfirm="onBanConfirm"
+        />
+        <view class="btn btn-sm btn-ghost" bindtap="clearAllBans">清空</view>
+      </view>
+    </view>
+
+    <!-- 搜索建议 -->
+    <view class="ban-suggestions" wx:if="{{banSuggestions.length > 0}}">
+      <view
+        class="sug-item"
+        wx:for="{{banSuggestions}}"
+        wx:key="*this"
+        data-hero="{{item}}"
+        bindtap="onSelectBanHero"
+      >{{item}}</view>
+    </view>
+
+    <!-- Ban 列表 -->
+    <view class="ban-list">
+      <view
+        class="ban-chip"
+        wx:for="{{bannedList}}"
+        wx:key="*this"
+        data-hero="{{item}}"
+        bindtap="onRemoveBan"
+      >✕ {{item}}</view>
+      <text class="empty-text" wx:if="{{bannedList.length === 0}}">暂无 Ban 位</text>
+    </view>
   </view>
 
-  <view class="result-grid">
-    <view class="card team-card frame-card blue-side">
-      <view class="side-header">
-        <text class="side-label">蓝色方</text>
-        <text class="win-prob">预测胜率 {{winRate.blue}}%</text>
+  <!-- 英雄池统计 -->
+  <view class="card stats-panel">
+    <text class="card-title">📊 英雄池统计</text>
+    <view class="stats-grid">
+      <view class="stat-item" wx:for="{{roleStats}}" wx:key="role">
+        <text class="stat-icon">{{item.icon}}</text>
+        <text class="stat-role">{{item.role}}</text>
+        <text class="stat-count">{{item.total}}</text>
+        <text class="stat-avail">可用 {{item.available}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 阵容展示 -->
+  <view class="teams-section {{showTeams ? 'show' : ''}}">
+    <!-- 蓝色方 -->
+    <view class="team-card team-blue">
+      <view class="team-header blue">
+        <text class="team-badge">🔵</text>
+        <text class="team-title">蓝色方</text>
       </view>
       <view class="lineup">
-        <view class="lineup-item" wx:for="{{blueTeam}}" wx:key="role">
-          <view class="role-icon-placeholder"></view>
-          <text class="role">{{item.role}}</text>
-          <text class="hero-name">{{item.hero}}</text>
+        <view class="lineup-item blue-item" wx:for="{{blueTeam}}" wx:key="role"
+          style="animation-delay: {{index * 0.1}}s">
+          <view class="role-info">
+            <view class="role-icon-box">
+              <text class="role-icon">{{item.icon}}</text>
+            </view>
+            <text class="role-name">{{item.role}}</text>
+          </view>
+          <text class="hero-name blue-hero">{{item.hero}}</text>
+        </view>
+        <view class="empty-lineup" wx:if="{{blueTeam.length === 0}}">
+          <text class="empty-text">等待生成...</text>
         </view>
       </view>
     </view>
 
+    <!-- VS 分隔 -->
     <view class="vs-divider">
-      <view class="vs-circle">对决</view>
+      <text class="vs-text">VS</text>
     </view>
 
-    <view class="card team-card frame-card red-side">
-      <view class="side-header">
-        <text class="side-label">红色方</text>
-        <text class="win-prob">预测胜率 {{winRate.red}}%</text>
+    <!-- 红色方 -->
+    <view class="team-card team-red">
+      <view class="team-header red">
+        <text class="team-badge">🔴</text>
+        <text class="team-title">红色方</text>
       </view>
       <view class="lineup">
-        <view class="lineup-item" wx:for="{{redTeam}}" wx:key="role">
-          <view class="role-icon-placeholder"></view>
-          <text class="role">{{item.role}}</text>
-          <text class="hero-name">{{item.hero}}</text>
+        <view class="lineup-item red-item" wx:for="{{redTeam}}" wx:key="role"
+          style="animation-delay: {{index * 0.1 + 0.05}}s">
+          <view class="role-info">
+            <view class="role-icon-box">
+              <text class="role-icon">{{item.icon}}</text>
+            </view>
+            <text class="role-name">{{item.role}}</text>
+          </view>
+          <text class="hero-name red-hero">{{item.hero}}</text>
+        </view>
+        <view class="empty-lineup" wx:if="{{redTeam.length === 0}}">
+          <text class="empty-text">等待生成...</text>
         </view>
       </view>
     </view>
   </view>
 
-  <view class="card used-section frame-card">
-    <view class="corner-decor bottom-left"></view>
-    <view class="corner-decor bottom-right"></view>
-    <text class="card-title gold-text">已用英雄记录</text>
-    <text class="used-count">{{usedCountText}}</text>
-
-    <view class="history-list" wx:if="{{usageHistory.length}}">
-      <view class="history-card" wx:for="{{usageHistory}}" wx:key="round">
-        <text class="history-title">第 {{item.round}} 局</text>
-        <view class="history-head">
-          <text class="history-col-role">位置</text>
-          <text class="history-col-blue">蓝色方</text>
-          <text class="history-col-red">红色方</text>
-        </view>
-        <view class="history-row" wx:for="{{item.positions}}" wx:key="role" wx:for-item="pos">
-          <text class="history-col-role">{{pos.role}}</text>
-          <text class="history-col-blue">{{pos.blue}}</text>
-          <text class="history-col-red">{{pos.red}}</text>
-        </view>
-      </view>
+  <!-- 已上场英雄 -->
+  <view class="card used-section">
+    <view class="used-header">
+      <text class="card-title">🏟️ 已上场英雄</text>
+      <text class="used-badge">{{usedCount}} / {{totalHeroes}}</text>
     </view>
-
-    <text class="history-empty" wx:else>暂无记录，生成阵容后会自动记录历史。</text>
+    <view class="used-progress-wrap">
+      <view class="used-progress" style="width: {{usedProgress}}%"></view>
+    </view>
+    <view class="used-pool">
+      <view class="used-chip" wx:for="{{usedPool}}" wx:key="*this">{{item}}</view>
+      <text class="empty-text" wx:if="{{usedPool.length === 0}}">暂无英雄上场</text>
+    </view>
   </view>
 
+  <!-- 历史记录弹窗 -->
+  <view class="modal-overlay {{showHistory ? 'open' : ''}}" bindtap="onHistoryMaskTap">
+    <view class="modal" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="card-title">📋 历史记录</text>
+        <view class="modal-close" bindtap="closeHistory">
+          <text>✕</text>
+        </view>
+      </view>
+      <scroll-view class="modal-body" scroll-y>
+        <view class="history-round" wx:for="{{historyRounds}}" wx:key="round">
+          <text class="round-title">第 {{item.round}} 轮 · {{item.time}}</text>
+          <view class="round-teams">
+            <view class="round-team blue-round">
+              <text class="round-team-title">🔵 蓝色方</text>
+              <view class="round-hero" wx:for="{{item.blue}}" wx:key="role" wx:for-item="h">
+                <text class="round-role">{{h.icon}} {{h.role}}</text>
+                <text class="round-name">{{h.hero}}</text>
+              </view>
+            </view>
+            <view class="round-team red-round">
+              <text class="round-team-title">🔴 红色方</text>
+              <view class="round-hero" wx:for="{{item.red}}" wx:key="role" wx:for-item="h">
+                <text class="round-role">{{h.icon}} {{h.role}}</text>
+                <text class="round-name">{{h.hero}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <text class="empty-text center" wx:if="{{historyRounds.length === 0}}">暂无历史记录</text>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 底部 -->
   <view class="footer">
-    <text>海克斯科技系统 · 长按标题查看版本信息</text>
+    <text>西兰花 LOL 内战随机器 v2.0 · 172位英雄全覆盖</text>
   </view>
 </view>

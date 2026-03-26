@@ -1,6 +1,6 @@
 page {
   min-height: 100%;
-  background-color: #0a1428;
-  color: #f0e6d2;
-  font-family: "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+  background-color: #0a0e1a;
+  color: #e2e8f0;
+  font-family: "PingFang SC", "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
 }

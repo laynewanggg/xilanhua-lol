@@ -3,44 +3,118 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LOL 10人内战阵容随机器</title>
+    <title>LOL 10人内战阵容随机器 v2.0</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="bg-glow"></div>
     <main class="app">
-      <header>
-        <h1>LOL 10 人内战阵容随机器</h1>
-        <p>一键随机双方阵容，按位置匹配英雄池</p>
+      <!-- 顶部标题 -->
+      <header class="header">
+        <div class="logo-area">
+          <div class="logo-icon">⚔️</div>
+          <div>
+            <h1>LOL 内战随机器</h1>
+            <p class="subtitle">v2.0 · 10人阵容生成 · 172位英雄全覆盖</p>
+          </div>
+        </div>
       </header>
 
-      <section class="controls">
-        <label class="toggle">
-          <input type="checkbox" id="globalBp" />
-          <span>启用全局 BP（整局已上场英雄不可再次上场）</span>
-        </label>
-        <div class="buttons">
-          <button id="generateBtn" type="button">一键生成阵容</button>
-          <button id="resetGameBtn" type="button" class="secondary">重置整局</button>
+      <!-- 控制面板 -->
+      <section class="control-panel">
+        <div class="control-row">
+          <div class="toggle-group">
+            <label class="switch-label">
+              <input type="checkbox" id="globalBp" class="sr-only" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-text">全局 BP 模式</span>
+            </label>
+            <span class="hint">（已上场英雄不可重复出场）</span>
+          </div>
+          <div class="btn-group">
+            <button id="generateBtn" type="button" class="btn btn-primary">
+              <span class="btn-icon">🎲</span> 生成阵容
+            </button>
+            <button id="resetGameBtn" type="button" class="btn btn-ghost">
+              <span class="btn-icon">🔄</span> 重置整局
+            </button>
+            <button id="historyBtn" type="button" class="btn btn-ghost">
+              <span class="btn-icon">📋</span> 历史记录
+            </button>
+          </div>
         </div>
-        <p id="status" class="status"></p>
+        <div id="status" class="status-bar"></div>
       </section>
 
-      <section class="result-grid">
-        <article class="team-card">
-          <h2>蓝色方</h2>
+      <!-- Ban 英雄面板 -->
+      <section class="ban-panel" id="banPanel">
+        <div class="ban-header">
+          <h3>🚫 Ban 英雄</h3>
+          <div class="ban-controls">
+            <input type="text" id="banInput" class="ban-input" placeholder="输入英雄名搜索..." autocomplete="off" />
+            <button id="clearBanBtn" type="button" class="btn btn-sm btn-ghost">清空</button>
+          </div>
+        </div>
+        <div id="banSuggestions" class="ban-suggestions"></div>
+        <div id="banList" class="ban-list"></div>
+      </section>
+
+      <!-- 阵容展示 -->
+      <section class="teams-section">
+        <article class="team-card team-blue" id="blueCard">
+          <div class="team-header blue">
+            <span class="team-badge">🔵</span>
+            <h2>蓝色方</h2>
+          </div>
           <ul id="blueTeam" class="lineup"></ul>
         </article>
-        <article class="team-card">
-          <h2>红色方</h2>
+        <div class="vs-divider">
+          <span class="vs-text">VS</span>
+        </div>
+        <article class="team-card team-red" id="redCard">
+          <div class="team-header red">
+            <span class="team-badge">🔴</span>
+            <h2>红色方</h2>
+          </div>
           <ul id="redTeam" class="lineup"></ul>
         </article>
       </section>
 
+      <!-- 英雄池统计 -->
+      <section class="stats-panel">
+        <h3>📊 英雄池统计</h3>
+        <div class="stats-grid" id="statsGrid"></div>
+      </section>
+
+      <!-- 已上场英雄 -->
       <section class="used-section">
-        <h3>全局已上场英雄</h3>
-        <p id="usedCount">0</p>
+        <div class="used-header">
+          <h3>🏟️ 已上场英雄</h3>
+          <span id="usedCount" class="used-badge">0 / 172</span>
+        </div>
+        <div class="used-progress-wrap">
+          <div class="used-progress" id="usedProgress"></div>
+        </div>
         <div id="usedPool" class="used-pool"></div>
       </section>
+
+      <!-- 历史记录弹窗 -->
+      <div class="modal-overlay" id="historyModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3>📋 历史记录</h3>
+            <button class="modal-close" id="closeModal">&times;</button>
+          </div>
+          <div class="modal-body" id="historyList">
+            <p class="empty-hint">暂无历史记录</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部 -->
+      <footer class="footer">
+        <p>西兰花 LOL 内战随机器 v2.0 · 数据来源腾讯官方英雄列表</p>
+      </footer>
     </main>
 
     <script src="app.js"></script>
