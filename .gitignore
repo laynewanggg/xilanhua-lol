@@ -1,1 +1,11 @@
 .DS_Store
+# 测试/调试文件
+.env
+test.jpg
+test2.jpg
+crops/
+verify.js
+verify-result.json
+fetch-config.js
+icon-match.py
+match-result.json

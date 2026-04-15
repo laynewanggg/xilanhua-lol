@@ -1,13 +1,30 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/analysis/analysis"
   ],
   "window": {
-    "navigationBarTitleText": "LOL 内战随机器 v2.0",
+    "navigationBarTitleText": "西兰花 LOL",
     "navigationBarBackgroundColor": "#0a0e1a",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#0a0e1a",
     "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#4a5568",
+    "selectedColor": "#f59e0b",
+    "backgroundColor": "#0a0e1a",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "阵容"
+      },
+      {
+        "pagePath": "pages/analysis/analysis",
+        "text": "战绩"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

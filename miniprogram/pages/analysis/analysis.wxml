@@ -1,0 +1,320 @@
+<!-- 战绩分析综合页 -->
+<view class="page">
+  <!-- Tab 栏 -->
+  <view class="inner-tabs">
+    <view class="inner-tab {{activeTab === 'record' ? 'active' : ''}}" data-tab="record" bindtap="switchTab">录入</view>
+    <view class="inner-tab {{activeTab === 'players' ? 'active' : ''}}" data-tab="players" bindtap="switchTab">选手</view>
+    <view class="inner-tab {{activeTab === 'review' ? 'active' : ''}}" data-tab="review" bindtap="switchTab">点评</view>
+  </view>
+
+  <!-- ==================== 录入 ==================== -->
+  <view class="tab-content" wx:if="{{activeTab === 'record'}}">
+
+    <!-- 上传区 -->
+    <view class="card" wx:if="{{!screenshot && !blueTeam[0].hero}}">
+      <view class="upload-zone" bindtap="chooseScreenshot">
+        <text class="upload-icon">📷</text>
+        <text class="upload-title">上传 LOL 结算截图</text>
+        <text class="upload-hint">AI 自动识别英雄、KDA，一键录入</text>
+      </view>
+      <view class="quick-actions">
+        <view class="btn btn-sm btn-ghost" bindtap="quickFill">🎲 随机填充</view>
+      </view>
+    </view>
+
+    <!-- 截图预览 + 识别状态 -->
+    <view class="card" wx:if="{{screenshot}}">
+      <view class="upload-preview">
+        <image src="{{screenshot}}" mode="aspectFit" class="preview-img" bindtap="chooseScreenshot" />
+        <view class="upload-remove" catchtap="removeScreenshot">✕</view>
+        <view class="ocr-overlay" wx:if="{{ocrStatus === 'loading'}}">
+          <view class="ocr-spinner"></view>
+          <text class="ocr-text">AI 识别中...</text>
+        </view>
+        <view class="ocr-overlay ocr-fail" wx:if="{{ocrStatus === 'fail'}}">
+          <text class="ocr-text">识别失败</text>
+          <view class="btn btn-sm btn-primary" style="margin-top:12rpx;" catchtap="chooseScreenshot">重新上传</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 识别结果 -->
+    <block wx:if="{{ocrStatus === 'done' || (!screenshot && blueTeam[0].hero)}}">
+      <!-- 概览 -->
+      <view class="card result-overview">
+        <view class="ro-header">
+          <view class="ro-winner {{winnerOptions[winnerIndex].value}}">
+            {{winnerOptions[winnerIndex].label}} 获胜
+          </view>
+          <text class="ro-duration" wx:if="{{matchDuration}}">{{matchDuration}}分钟</text>
+        </view>
+      </view>
+
+      <!-- 蓝方 -->
+      <view class="card team-result {{winnerOptions[winnerIndex].value === 'blue' ? 'team-win' : 'team-lose'}} blue-side">
+        <view class="tr-header blue">
+          <text class="tr-title">蓝色方</text>
+          <text class="tr-result {{winnerOptions[winnerIndex].value === 'blue' ? 'win' : 'loss'}}">
+            {{winnerOptions[winnerIndex].value === 'blue' ? '胜' : '败'}}
+          </text>
+        </view>
+        <view class="tr-players">
+          <view class="tr-player" wx:for="{{blueTeam}}" wx:key="role">
+            <view class="tr-info">
+              <view class="tr-hero-edit" wx:if="{{ocrStatus === 'done'}}">
+                <input class="tr-hero-input" value="{{item.hero}}" data-side="blue" data-index="{{index}}" bindinput="onHeroInput" bindfocus="onHeroFocus" bindblur="onHeroBlur" placeholder="英雄" />
+                <text class="tr-hero-edit-icon">✏️</text>
+              </view>
+              <text class="tr-hero" wx:else>{{item.hero}}</text>
+              <text class="tr-name">{{item.displayName || item.name || ''}}</text>
+            </view>
+            <text class="tr-kda">{{item.kills || 0}}/{{item.deaths || 0}}/{{item.assists || 0}}</text>
+          </view>
+          <view class="hero-suggest-dropdown" wx:if="{{heroSuggestions.length > 0 && heroSugSide === 'blue'}}">
+            <view class="hero-suggest-item" wx:for="{{heroSuggestions}}" wx:key="*this" data-hero="{{item}}" data-side="blue" data-index="{{heroSugIndex}}" bindtap="selectHero">{{item}}</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 红方 -->
+      <view class="card team-result {{winnerOptions[winnerIndex].value === 'red' ? 'team-win' : 'team-lose'}} red-side">
+        <view class="tr-header red">
+          <text class="tr-title">红色方</text>
+          <text class="tr-result {{winnerOptions[winnerIndex].value === 'red' ? 'win' : 'loss'}}">
+            {{winnerOptions[winnerIndex].value === 'red' ? '胜' : '败'}}
+          </text>
+        </view>
+        <view class="tr-players">
+          <view class="tr-player" wx:for="{{redTeam}}" wx:key="role">
+            <view class="tr-info">
+              <view class="tr-hero-edit" wx:if="{{ocrStatus === 'done'}}">
+                <input class="tr-hero-input" value="{{item.hero}}" data-side="red" data-index="{{index}}" bindinput="onHeroInput" bindfocus="onHeroFocus" bindblur="onHeroBlur" placeholder="英雄" />
+                <text class="tr-hero-edit-icon">✏️</text>
+              </view>
+              <text class="tr-hero" wx:else>{{item.hero}}</text>
+              <text class="tr-name">{{item.displayName || item.name || ''}}</text>
+            </view>
+            <text class="tr-kda">{{item.kills || 0}}/{{item.deaths || 0}}/{{item.assists || 0}}</text>
+          </view>
+          <view class="hero-suggest-dropdown" wx:if="{{heroSuggestions.length > 0 && heroSugSide === 'red'}}">
+            <view class="hero-suggest-item" wx:for="{{heroSuggestions}}" wx:key="*this" data-hero="{{item}}" data-side="red" data-index="{{heroSugIndex}}" bindtap="selectHero">{{item}}</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 提交 -->
+      <view class="submit-row">
+        <view class="btn btn-primary btn-lg" bindtap="submitMatch">确认保存</view>
+        <view class="btn btn-ghost btn-lg" bindtap="removeScreenshot">重新录入</view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!screenshot && !blueTeam[0].hero && matchList.length === 0}}">
+      <text class="empty-icon">📸</text>
+      <text class="empty-text">上传一张结算截图开始录入</text>
+    </view>
+
+    <!-- ========== 历史记录 ========== -->
+    <view wx:if="{{matchList.length > 0}}" style="margin-top:32rpx;">
+      <view class="section-header">
+        <text class="section-title">历史战绩</text>
+        <text class="section-count">{{totalGames}}场 · {{totalPlayers}}人 · {{totalKills}}杀</text>
+      </view>
+
+      <view class="history-list">
+        <view class="match-entry" wx:for="{{matchList}}" wx:key="id">
+          <view class="me-header" data-id="{{item.id}}" bindtap="toggleMatchExpand">
+            <view class="me-info">
+              <text class="me-date">{{item.date}}</text>
+              <text class="me-duration">{{item.duration}}分</text>
+              <text class="me-tag" wx:if="{{item.tag}}">{{item.tag}}</text>
+            </view>
+            <view class="me-header-right">
+              <text class="me-result {{item.winner === 'blue' ? 'blue-win' : 'red-win'}}">
+                {{item.winner === 'blue' ? '蓝胜' : '红胜'}}
+              </text>
+              <text class="me-expand-icon">{{expandedMatchId === item.id ? '▲' : '▼'}}</text>
+            </view>
+          </view>
+          <view class="me-detail" wx:if="{{expandedMatchId === item.id}}">
+            <view class="me-teams">
+              <view class="me-team blue">
+                <view class="me-player" wx:for="{{item.blue}}" wx:for-item="p" wx:key="name">
+                  <text class="mp-name">{{p.displayName || p.name}}</text>
+                  <text class="mp-hero">{{p.hero}}</text>
+                  <text class="mp-kda">{{p.kills}}/{{p.deaths}}/{{p.assists}}</text>
+                </view>
+              </view>
+              <view class="me-team red">
+                <view class="me-player" wx:for="{{item.red}}" wx:for-item="p" wx:key="name">
+                  <text class="mp-name">{{p.displayName || p.name}}</text>
+                  <text class="mp-hero">{{p.hero}}</text>
+                  <text class="mp-kda">{{p.kills}}/{{p.deaths}}/{{p.assists}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="me-actions">
+              <view class="action-btn delete" catchtap="deleteMatch" data-id="{{item.id}}">删除</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 选手 ==================== -->
+  <view class="tab-content" wx:if="{{activeTab === 'players'}}">
+    <view class="player-grid" wx:if="{{playerCards.length > 0}}">
+      <view class="player-card" wx:for="{{playerCards}}" wx:key="id" data-id="{{item.id}}" bindtap="showPlayerDetail">
+        <view class="pc-top">
+          <view class="pc-identity">
+            <view class="pc-avatar">{{item.initial}}</view>
+            <view>
+              <text class="pc-name">{{item.nick || item.id}}</text>
+              <text class="pc-nick" wx:if="{{item.nick}}">{{item.id}}</text>
+            </view>
+          </view>
+          <text class="pc-winrate {{item.winrate >= 50 ? 'win' : 'loss'}}">{{item.winrate}}%</text>
+        </view>
+        <view class="pc-stats-row">
+          <view class="pc-stat"><text class="pc-val">{{item.games}}</text><text class="pc-label">场</text></view>
+          <view class="pc-stat"><text class="pc-val win">{{item.wins}}</text><text class="pc-label">胜</text></view>
+          <view class="pc-stat"><text class="pc-val loss">{{item.losses}}</text><text class="pc-label">负</text></view>
+          <view class="pc-stat"><text class="pc-val">{{item.avgKDA}}</text><text class="pc-label">KDA</text></view>
+        </view>
+        <view class="pc-winrate-bar"><view class="pc-winrate-fill" style="width: {{item.winrate}}%"></view></view>
+        <view class="ability-bars">
+          <view class="ab-item"><text class="ab-label">Carry</text><view class="ab-track"><view class="ab-fill carry" style="width:{{item.carry}}%"></view></view></view>
+          <view class="ab-item"><text class="ab-label">稳定</text><view class="ab-track"><view class="ab-fill stable" style="width:{{item.stable}}%"></view></view></view>
+          <view class="ab-item"><text class="ab-label">团队</text><view class="ab-track"><view class="ab-fill team" style="width:{{item.team}}%"></view></view></view>
+          <view class="ab-item"><text class="ab-label">激进</text><view class="ab-track"><view class="ab-fill aggro" style="width:{{item.aggro}}%"></view></view></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{playerCards.length === 0}}">
+      <text class="empty-icon">👤</text>
+      <text class="empty-text">录入比赛后自动创建选手档案</text>
+    </view>
+
+    <!-- 选手详情弹窗 -->
+    <view class="modal-overlay {{showDetail ? 'open' : ''}}" bindtap="closeDetail">
+      <view class="modal" catchtap="preventBubble">
+        <view class="modal-header">
+          <text class="modal-title">{{detailTitle}}</text>
+          <view class="modal-close" bindtap="closeDetail">×</view>
+        </view>
+        <scroll-view scroll-y class="modal-body">
+          <view class="detail-section">
+            <view class="ie-row">
+              <text class="ie-label">外号</text>
+              <input class="ie-input" placeholder="设置外号" value="{{detailNick}}" bindinput="onDetailNickInput" />
+              <view class="btn btn-sm btn-primary" bindtap="savePlayerIdentity">保存</view>
+            </view>
+          </view>
+
+          <view class="detail-section">
+            <view class="detail-grid">
+              <view class="detail-item"><text class="dv">{{detailStats.games}}</text><text class="dl">场次</text></view>
+              <view class="detail-item"><text class="dv win">{{detailStats.wins}}</text><text class="dl">胜</text></view>
+              <view class="detail-item"><text class="dv loss">{{detailStats.losses}}</text><text class="dl">负</text></view>
+              <view class="detail-item"><text class="dv">{{detailStats.avgKDA}}</text><text class="dl">KDA</text></view>
+              <view class="detail-item"><text class="dv {{detailStats.winrate >= 50 ? 'win' : 'loss'}}">{{detailStats.winrate}}%</text><text class="dl">胜率</text></view>
+              <view class="detail-item"><text class="dv">{{detailStats.streakText}}</text><text class="dl">连胜/败</text></view>
+            </view>
+          </view>
+
+          <view class="detail-section" wx:if="{{detailHeroes.length > 0}}">
+            <text class="detail-h4">常用英雄</text>
+            <view class="hero-chips">
+              <text class="hero-chip" wx:for="{{detailHeroes}}" wx:key="hero">{{item.hero}} ×{{item.count}}</text>
+            </view>
+          </view>
+
+          <view class="detail-section" wx:if="{{detailMatches.length > 0}}">
+            <text class="detail-h4">近期战绩</text>
+            <view class="detail-matches">
+              <view class="dm-item" wx:for="{{detailMatches}}" wx:key="matchId">
+                <text class="dm-date">{{item.date}}</text>
+                <text class="dm-hero">{{item.hero}}</text>
+                <text class="dm-kda">{{item.kills}}/{{item.deaths}}/{{item.assists}}</text>
+                <text class="dm-result {{item.win ? 'win' : 'loss'}}">{{item.win ? '胜' : '败'}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="detail-bottom-actions">
+            <button class="btn btn-sm btn-share" open-type="share" data-share-type="player">分享名片</button>
+            <view class="btn btn-sm btn-danger" bindtap="deleteCurrentPlayer">删除档案</view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 点评 ==================== -->
+  <view class="tab-content" wx:if="{{activeTab === 'review'}}">
+    <view class="card">
+      <view class="review-input-wrap">
+        <textarea class="review-input" placeholder="输入想点评的内容...\n如：西兰花最近表现、点评最近3场" value="{{reviewPrompt}}" bindinput="onReviewPromptInput" maxlength="300" auto-height />
+      </view>
+      <view class="action-row">
+        <view class="btn btn-primary btn-lg" bindtap="generateSmartReview">生成点评</view>
+      </view>
+    </view>
+
+    <!-- 快捷标签 -->
+    <view class="quick-tags" wx:if="{{!hasResult}}">
+      <view class="quick-tag" bindtap="quickReview" data-type="latest">最近一场</view>
+      <view class="quick-tag" bindtap="quickReview" data-type="week">本周总评</view>
+      <view class="quick-tag" wx:for="{{quickPlayerTags}}" wx:key="name" bindtap="quickReview" data-type="player" data-name="{{item.name}}">
+        {{item.name}}
+      </view>
+    </view>
+
+    <!-- 点评结果 -->
+    <view class="card" wx:if="{{hasResult}}">
+      <view class="card-header">
+        <text class="card-title">{{reviewLabel}}</text>
+      </view>
+      <block wx:if="{{reviewType === 'match'}}">
+        <view class="review-block" wx:for="{{reviewResults}}" wx:key="matchDate">
+          <text class="rb-title" wx:if="{{reviewResults.length > 1}}">第 {{index + 1}} 局 · {{item.matchDate}}</text>
+          <view class="rpc summary-card">
+            <text class="rpc-text bold">{{item.summary}}</text>
+          </view>
+          <view class="rpc" wx:for="{{item.players}}" wx:for-item="p" wx:key="name">
+            <view class="rpc-header">
+              <view class="rpc-left">
+                <text class="rpc-name">{{p.name}}</text>
+                <text class="rpc-hero">{{p.hero}}</text>
+                <text class="tag-mvp" wx:if="{{p.isMvp}}">MVP</text>
+                <text class="tag-svp" wx:if="{{p.isSvp}}">SVP</text>
+              </view>
+              <text class="rpc-kda {{p.kdaClass}}">{{p.kdaStr}}</text>
+            </view>
+            <text class="rpc-text">{{p.text}}</text>
+            <view class="rpc-memory" wx:if="{{p.memText}}">
+              <text>{{p.memText}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+      <block wx:if="{{reviewType === 'player'}}">
+        <view class="rpc summary-card">
+          <text class="rpc-text bold">{{playerReview.summary}}</text>
+        </view>
+        <view class="match-notes" wx:if="{{playerReview.matchNotes.length > 0}}">
+          <text class="note-line" wx:for="{{playerReview.matchNotes}}" wx:key="text">{{item.text}}</text>
+        </view>
+      </block>
+      <view class="review-actions">
+        <view class="btn btn-ghost" bindtap="generateSmartReview">换一组</view>
+        <button class="btn btn-share" open-type="share" data-share-type="review">分享</button>
+        <view class="btn btn-ghost" bindtap="copyReviewResult">复制</view>
+      </view>
+    </view>
+  </view>
+
+</view>
